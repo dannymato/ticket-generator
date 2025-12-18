@@ -67,4 +67,4 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ github.token }}
       with:
-        asset_paths: '["ticket-gen-darwin-x86_64.zip", "ticket-gen-darwin-aarch64.zip", "ticket-gen-darwin-x86_64.zip.sha256", "ticket-gen-aarch64-darwin.zip.sha256"]'
+        asset_paths: '["ticket-gen-darwin-x86_64.zip", "ticket-gen-darwin-aarch64.zip", "ticket-gen-darwin-x86_64.zip.sha256", "ticket-gen-darwin-aarch64.zip.sha256"]'
