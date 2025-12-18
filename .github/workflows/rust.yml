@@ -59,7 +59,7 @@ jobs:
 
     - name: Generate SHA256 checksums
       run: |
-        shasum -a 256 ticket-gen-darwin-x86_64.tar.gz > ticket-gen-darwin-x86_64.tar.gz.sha256
+        shasum -a 256 ticket-gen-darwin-x86_64.zip > ticket-gen-darwin-x86_64.zip.sha256
         shasum -a 256 ticket-gen-darwin-aarch64.zip > ticket-gen-darwin-aarch64.zip.sha256
 
     - name: Upload release binaries
