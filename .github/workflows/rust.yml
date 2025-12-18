@@ -44,9 +44,6 @@ jobs:
     - name: Checkout the repository
       uses: actions/checkout@v2
 
-    - name: Install Linux and Windows Cross Compilers
-      run: sudo apt-get install --yes --no-install-recommends musl-tools gcc-mingw-w64-x86-64-win32
-
     - name: Install rustup targets
       run: rustup target add x86_64-apple-darwin aarch64-apple-darwin
 
