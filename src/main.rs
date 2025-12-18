@@ -13,7 +13,7 @@ const SPECIALS: &'static str = ",.;:\"'!%#";
 fn main() -> eframe::Result {
     env_logger::init();
     let options = eframe::NativeOptions {
-        viewport: egui::ViewportBuilder::default().with_inner_size([320.0, 240.0]),
+        viewport: egui::ViewportBuilder::default().with_inner_size([400.0, 400.0]),
         ..Default::default()
     };
     eframe::run_native(
@@ -33,8 +33,10 @@ struct RandomizerApp {
     numbers: bool,
     specials: bool,
     rejected_chars: String,
-    ticket_count: u32,
-    ticket_str: String,
+    ticket_count: usize,
+    ticket_count_str: String,
+    ticket_length: usize,
+    ticket_length_str: String,
     file_path: Option<String>,
     is_processing: bool,
     inbox: UiInbox<String>,
@@ -79,14 +81,19 @@ impl RandomizerApp {
             return;
         }
 
+        if self.ticket_length == 0 || self.ticket_count == 0 {
+            return;
+        }
+
         self.is_processing = true;
         let tx = self.inbox.sender();
         let file_path = self.file_path.clone().unwrap();
         let token_count = self.ticket_count;
+        let ticket_length = self.ticket_length;
 
         std::thread::spawn(move || {
             // TODO: We should do something here
-            let _ = match build_csv(character_set, file_path, token_count, 15) {
+            let _ = match build_csv(character_set, file_path, token_count, ticket_length) {
                 Ok(()) => tx.send("Successfully wrote to CSV".to_owned()),
                 Err(str) => tx.send(str),
             };
@@ -94,7 +101,7 @@ impl RandomizerApp {
     }
 }
 
-fn build_csv(character_set: String, file_path: String, token_count: u32, token_length: u32) -> Result<(), String> {
+fn build_csv(character_set: String, file_path: String, token_count: usize, token_length: usize) -> Result<(), String> {
     let file = File::create(&file_path)
         .map_err(|err| format!("Failed to create file {file_path}: {err}"))?;
 
@@ -116,8 +123,8 @@ fn build_csv(character_set: String, file_path: String, token_count: u32, token_l
     Ok(())
 }
 
-fn gen_token(rng: &mut impl rand::Rng, character_set: &[char], already_generated: &HashSet<String>, token_length: u32) -> Result<String, String> {
-    let mut buf = String::with_capacity(token_length as usize);
+fn gen_token(rng: &mut impl rand::Rng, character_set: &[char], already_generated: &HashSet<String>, token_length: usize) -> Result<String, String> {
+    let mut buf = String::with_capacity(token_length);
     for _ in 0..token_length {
         let char = character_set.choose(rng).unwrap();
         buf.write_char(*char)
@@ -149,14 +156,29 @@ impl eframe::App for RandomizerApp {
             ui.horizontal(|ui| {
                 let count_label = ui.label("Ticket Count: ");
                 if ui
-                    .text_edit_singleline(&mut self.ticket_str)
+                    .text_edit_singleline(&mut self.ticket_count_str)
                     .labelled_by(count_label.id)
                     .lost_focus()
                 {
-                    if let Ok(parsed) = self.ticket_str.parse::<u32>() {
+                    if let Ok(parsed) = self.ticket_count_str.parse::<usize>() {
                         self.ticket_count = parsed;
                     } else {
-                        self.ticket_str = self.ticket_count.to_string();
+                        self.ticket_count_str = self.ticket_count.to_string();
+                    }
+                }
+            });
+
+            ui.horizontal(|ui| {
+                let length_label = ui.label("Ticket Length: ");
+                if ui
+                    .text_edit_singleline(&mut self.ticket_length_str)
+                    .labelled_by(length_label.id)
+                    .lost_focus()
+                {
+                    if let Ok(parsed) = self.ticket_length_str.parse::<usize>() {
+                        self.ticket_length = parsed;
+                    } else {
+                        self.ticket_length_str = self.ticket_length.to_string();
                     }
                 }
             });
