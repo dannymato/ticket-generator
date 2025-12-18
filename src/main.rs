@@ -1,14 +1,14 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")] // hide console window on Windows in release
 
-use std::{collections::HashSet, fs::File, fmt::Write};
 use rand::seq::IndexedRandom;
+use std::{collections::HashSet, fmt::Write, fs::File, slice};
 
 use egui_inbox::UiInbox;
 
-const CAPTIALS: &'static str = "ABCDEFGHIJKLMNOPQRSTUVQXYZ";
-const LOWERS: &'static str = "abcdefghijklmnopqrstuvqxyz";
-const NUMBERS: &'static str = "0123456789";
-const SPECIALS: &'static str = ",.;:\"'!%#";
+const CAPTIALS: &str = "ABCDEFGHIJKLMNOPQRSTUVQXYZ";
+const LOWERS: &str = "abcdefghijklmnopqrstuvqxyz";
+const NUMBERS: &str = "0123456789";
+const SPECIALS: &str = ",.;:\"'!%#";
 
 fn main() -> eframe::Result {
     env_logger::init();
@@ -63,13 +63,12 @@ impl RandomizerApp {
 
         let rejected_chars: Vec<char> = self.rejected_chars.chars().collect();
 
-        let buf = buf.replace(&rejected_chars[..], "");
-        buf
+        buf.replace(&rejected_chars[..], "")
     }
 
     fn start_processing(&mut self) {
         if self.is_processing {
-            return
+            return;
         }
 
         if self.file_path.is_none() {
@@ -101,7 +100,12 @@ impl RandomizerApp {
     }
 }
 
-fn build_csv(character_set: String, file_path: String, token_count: usize, token_length: usize) -> Result<(), String> {
+fn build_csv(
+    character_set: String,
+    file_path: String,
+    token_count: usize,
+    token_length: usize,
+) -> Result<(), String> {
     let file = File::create(&file_path)
         .map_err(|err| format!("Failed to create file {file_path}: {err}"))?;
 
@@ -114,7 +118,8 @@ fn build_csv(character_set: String, file_path: String, token_count: usize, token
 
     for _ in 0..token_count {
         let new_token = gen_token(&mut rng, &character_set, &set, token_length)?;
-        csv_writer.write_record(&[new_token.clone()])
+        csv_writer
+            .write_record(slice::from_ref(&new_token))
             .map_err(|err| format!("Failed to write to file: {err}"))?;
 
         set.insert(new_token);
@@ -123,7 +128,12 @@ fn build_csv(character_set: String, file_path: String, token_count: usize, token
     Ok(())
 }
 
-fn gen_token(rng: &mut impl rand::Rng, character_set: &[char], already_generated: &HashSet<String>, token_length: usize) -> Result<String, String> {
+fn gen_token(
+    rng: &mut impl rand::Rng,
+    character_set: &[char],
+    already_generated: &HashSet<String>,
+    token_length: usize,
+) -> Result<String, String> {
     let mut buf = String::with_capacity(token_length);
     for _ in 0..token_length {
         let char = character_set.choose(rng).unwrap();
@@ -197,9 +207,15 @@ impl eframe::App for RandomizerApp {
                 }
             });
 
-            ui.label(format!("Current character set {}", self.build_character_set()));
+            ui.label(format!(
+                "Current character set {}",
+                self.build_character_set()
+            ));
 
-            if ui.add_enabled(!self.is_processing, egui::Button::new("Submit")).clicked() {
+            if ui
+                .add_enabled(!self.is_processing, egui::Button::new("Submit"))
+                .clicked()
+            {
                 self.start_processing();
             }
 
@@ -207,7 +223,7 @@ impl eframe::App for RandomizerApp {
                 self.last_thread_message = last;
                 self.is_processing = false;
             }
-                ui.label(&self.last_thread_message);
+            ui.label(&self.last_thread_message);
         });
     }
 }
