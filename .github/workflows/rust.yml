@@ -22,22 +22,22 @@ jobs:
       run: cargo build --release --target x86_64-unknown-linux-musl --target x86_64-pc-windows-gnu
 
     - name: Tar x86_64 binary
-      run: tar -czvf token-gen-gnu-linux-x86_64.tar.gz -C target/x86_64-unknown-linux-musl/release token-gen
+      run: tar -czvf ticket-gen-gnu-linux-x86_64.tar.gz -C target/x86_64-unknown-linux-musl/release ticket-gen
 
     - name: Zip windows binary
-      run: zip -j token-gen-windows.zip target/x86_64-pc-windows-gnu/release/token-gen.exe
+      run: zip -j ticket-gen-windows.zip target/x86_64-pc-windows-gnu/release/ticket-gen.exe
 
     - name: Generate SHA256 checksums
       run: |
-        shasum -a 256 token-gen-gnu-linux-x86_64.tar.gz > token-gen-gnu-linux-x86_64.tar.gz.sha256
-        shasum -a 256 token-gen-windows.zip > token-gen-windows.zip.sha256
+        shasum -a 256 ticket-gen-gnu-linux-x86_64.tar.gz > ticket-gen-gnu-linux-x86_64.tar.gz.sha256
+        shasum -a 256 ticket-gen-windows.zip > ticket-gen-windows.zip.sha256
 
     - name: Upload release binaries
       uses: alexellis/upload-assets@0.4.0
       env:
         GITHUB_TOKEN: ${{ github.token }}
       with:
-        asset_paths: '["token-gen-gnu-linux-x86_64.tar.gz", "token-gen-windows.zip", "token-gen-gnu-linux-x86_64.tar.gz.sha256", "token-gen-windows.zip.sha256"]'
+        asset_paths: '["ticket-gen-gnu-linux-x86_64.tar.gz", "ticket-gen-windows.zip", "ticket-gen-gnu-linux-x86_64.tar.gz.sha256", "ticket-gen-windows.zip.sha256"]'
   macos:
     runs-on: macos-latest
     steps:
@@ -51,20 +51,20 @@ jobs:
       run: cargo build --release --target x86_64-apple-darwin --target aarch64-apple-darwin
 
     - name: Zip x86_64 binary
-      run: zip -j token-gen-darwin-x86_64.zip target/x86_64-apple-darwin/release token-gen
+      run: zip -j ticket-gen-darwin-x86_64.zip target/x86_64-apple-darwin/release ticket-gen
 
 
     - name: Zip x86_64 binary
-      run: zip -j token-gen-darwin-aarch64.zip target/aarch64-apple-darwin/release token-gen
+      run: zip -j ticket-gen-darwin-aarch64.zip target/aarch64-apple-darwin/release ticket-gen
 
     - name: Generate SHA256 checksums
       run: |
-        shasum -a 256 token-gen-darwin-x86_64.tar.gz > token-gen-darwin-x86_64.tar.gz.sha256
-        shasum -a 256 token-gen-darwin-aarch64.zip > token-gen-darwin-aarch64.zip.sha256
+        shasum -a 256 ticket-gen-darwin-x86_64.tar.gz > ticket-gen-darwin-x86_64.tar.gz.sha256
+        shasum -a 256 ticket-gen-darwin-aarch64.zip > ticket-gen-darwin-aarch64.zip.sha256
 
     - name: Upload release binaries
       uses: alexellis/upload-assets@0.4.0
       env:
         GITHUB_TOKEN: ${{ github.token }}
       with:
-        asset_paths: '["token-gen-darwin-x86_64.tar.gz", "token-gen-darwin-aarch64.zip", "token-gen-darwin-x86_64.zip.sha256", "token-gen-aarch64-darwin.zip.sha256"]'
+        asset_paths: '["ticket-gen-darwin-x86_64.tar.gz", "ticket-gen-darwin-aarch64.zip", "ticket-gen-darwin-x86_64.zip.sha256", "ticket-gen-aarch64-darwin.zip.sha256"]'
